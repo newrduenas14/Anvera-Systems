@@ -1,15 +1,18 @@
 // Scroll reveal
 const reveals = document.querySelectorAll('.reveal');
 
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach((entry) => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, { threshold: 0.12 });
+if (reveals.length) {
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
 
-reveals.forEach((el) => observer.observe(el));
+  reveals.forEach((el) => observer.observe(el));
+}
 
 // Trigger hero reveals immediately
 setTimeout(() => {
@@ -23,7 +26,8 @@ const navToggle = document.querySelector('.nav-toggle');
 const navMenu = document.querySelector('.nav-menu');
 
 if (navToggle && navMenu) {
-  navToggle.addEventListener('click', () => {
+  navToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
     const isOpen = navMenu.classList.toggle('open');
     navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   });
@@ -33,5 +37,22 @@ if (navToggle && navMenu) {
       navMenu.classList.remove('open');
       navToggle.setAttribute('aria-expanded', 'false');
     });
+  });
+
+  document.addEventListener('click', (e) => {
+    const clickedInsideMenu = navMenu.contains(e.target);
+    const clickedToggle = navToggle.contains(e.target);
+
+    if (!clickedInsideMenu && !clickedToggle) {
+      navMenu.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900) {
+      navMenu.classList.remove('open');
+      navToggle.setAttribute('aria-expanded', 'false');
+    }
   });
 }
